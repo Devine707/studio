@@ -27,30 +27,37 @@ import {
   Sparkles,
 } from 'lucide-react';
 import Image from 'next/image';
-import { useSearchParams } from 'next/navigation';
-import { Suspense, useMemo } from 'react';
+import { Suspense, useMemo, useEffect, useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import Link from 'next/link';
 
 function ResultsDisplay() {
-  const searchParams = useSearchParams();
   const { toast } = useToast();
   const { addTreatment, routine } = useRoutineStore();
+  const [analysisResult, setAnalysisResult] = useState<AnalyzeFacialImageAndRecommendTreatmentsOutput | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const analysisResult = useMemo(() => {
-    const data = searchParams.get('data');
+  useEffect(() => {
+    const data = sessionStorage.getItem('analysisResult');
     if (data) {
       try {
-        return JSON.parse(
-          data
-        ) as AnalyzeFacialImageAndRecommendTreatmentsOutput;
+        setAnalysisResult(JSON.parse(data));
       } catch (e) {
         console.error('Failed to parse analysis result', e);
-        return null;
       }
     }
-    return null;
-  }, [searchParams]);
+    setIsLoading(false);
+  }, []);
+
+
+  if (isLoading) {
+    return (
+        <div className="flex flex-col items-center justify-center text-center py-20">
+            <h2 className="text-2xl font-bold">Loading Results...</h2>
+        </div>
+    );
+  }
+
 
   if (!analysisResult) {
     return (

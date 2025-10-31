@@ -6,26 +6,30 @@ import { z } from 'zod';
 
 const schema = z.object({
   photoDataUri: z.string().min(1, { message: 'Photo data is required.' }),
+  redirectPath: z.string(),
 });
 
 export async function analyzeImageAction(prevState: any, formData: FormData) {
   const validatedFields = schema.safeParse({
     photoDataUri: formData.get('photoDataUri'),
+    redirectPath: formData.get('redirectPath'),
   });
 
   if (!validatedFields.success) {
     return {
-      message: 'Invalid photo data.',
+      message: 'Invalid form data.',
     };
   }
 
   try {
     const result =
-      await analyzeFacialImageAndRecommendTreatments(validatedFields.data);
-    const params = new URLSearchParams({
-      data: JSON.stringify(result),
-    });
-    redirect(`/results?${params.toString()}`);
+      await analyzeFacialImageAndRecommendTreatments({ photoDataUri: validatedFields.data.photoDataUri });
+
+    // The result is returned to the client to be stored in sessionStorage
+    return {
+      data: result,
+      redirectPath: validatedFields.data.redirectPath
+    }
   } catch (error) {
     console.error(error);
     return {

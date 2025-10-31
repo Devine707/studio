@@ -7,6 +7,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Camera, Loader2, RefreshCw } from 'lucide-react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useFormState, useFormStatus } from 'react-dom';
+import { useRouter } from 'next/navigation';
 
 function SubmitButton() {
   const { pending } = useFormStatus();
@@ -29,6 +30,7 @@ export default function ScanPage() {
   const [imageData, setImageData] = useState<string | null>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const router = useRouter();
 
   const [state, formAction] = useFormState(analyzeImageAction, { message: '' });
   const { toast } = useToast();
@@ -41,7 +43,20 @@ export default function ScanPage() {
         description: state.message,
       });
     }
-  }, [state, toast]);
+    if (state.data && state.redirectPath) {
+        try {
+            sessionStorage.setItem('analysisResult', JSON.stringify(state.data));
+            router.push(state.redirectPath);
+        } catch (e) {
+            console.error("Failed to save analysis result to sessionStorage", e);
+            toast({
+                variant: 'destructive',
+                title: 'Error',
+                description: 'Could not save analysis results. Please try again.',
+            });
+        }
+    }
+  }, [state, toast, router]);
 
   const getCameraStream = useCallback(async () => {
     setImageData(null);
@@ -133,6 +148,7 @@ export default function ScanPage() {
               className="flex flex-col items-center gap-4"
             >
               <input type="hidden" name="photoDataUri" value={imageData} />
+              <input type="hidden" name="redirectPath" value="/results" />
               <div className="flex gap-4">
                 <Button
                   variant="outline"
