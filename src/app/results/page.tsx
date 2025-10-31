@@ -27,7 +27,7 @@ import {
   Sparkles,
 } from 'lucide-react';
 import Image from 'next/image';
-import { Suspense, useMemo, useEffect, useState } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import Link from 'next/link';
 

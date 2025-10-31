@@ -1,7 +1,6 @@
 'use server';
 
 import { analyzeFacialImageAndRecommendTreatments } from '@/ai/flows/analyze-facial-image-and-recommend-treatments';
-import { redirect } from 'next/navigation';
 import { z } from 'zod';
 
 const schema = z.object({
@@ -25,7 +24,6 @@ export async function analyzeImageAction(prevState: any, formData: FormData) {
     const result =
       await analyzeFacialImageAndRecommendTreatments({ photoDataUri: validatedFields.data.photoDataUri });
 
-    // The result is returned to the client to be stored in sessionStorage
     return {
       data: result,
       redirectPath: validatedFields.data.redirectPath
